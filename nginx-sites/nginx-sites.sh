@@ -171,7 +171,7 @@ function getdefaultconfpath()
 function enum_groups()
 {
 	local groupnames=
-	
+
 	groupnames=$(/usr/bin/find "$NGINX_SITES_DIR_AVAIL" -mindepth 1 -maxdepth 1 -type d -printf "%f\n" 2> /dev/null | sort | tr '[:space:]' ' ')
 	[ $? -eq 0 ] || exit_gen_error "$NGINX_SITES_DIR_AVAIL: Failed to enumerate directories"
 
@@ -196,7 +196,7 @@ function enum_sites()
 	local siteprefix=
 	local sitenames=
 
-	[[ "$sitespec" =~ "^(.+)/(.+)$" ]] || return 1
+	[[ "$sitespec" =~ ^(.+)/(.+)$ ]] || return 1
 
 	groupname="${BASH_REMATCH[1]}"
 	sitepattern="${BASH_REMATCH[2]}"
@@ -241,7 +241,7 @@ function combine_subdomains()
 
 	# Sort domains by length so root domains are before subdomains
 	servers=( $(echo "${servers[@]}" | tr " " "\n" | awk '{print length"\t"$0}' | sort -n | cut -f2-) )
-	
+
 	for (( i=0, max="${#servers[@]}"; i < max; i++ ))
 	do
 		# Skip subdomains we've combined already
@@ -255,7 +255,7 @@ function combine_subdomains()
 		# Build list of subdomains for domain
 		for (( j=i+1; j < max; j++ ))
 		do
-			if [[ "${servers[$j]}" =~ "$regex" ]]; then
+			if [[ "${servers[$j]}" =~ $regex ]]; then
 				subdomains=( ${subdomains[@]} "${BASH_REMATCH[1]}" )
 				servers[$j]=""
 			fi
@@ -336,13 +336,13 @@ function is_site_pattern()
 	local site="$1"
 	local group=
 
-	[[ "$site" =~ "^(.+)/(.+)$" ]] || return 1
+	[[ "$site" =~ ^(.+)/(.+)$ ]] || return 1
 
 	group="${BASH_REMATCH[1]}"
 	site="${BASH_REMATCH[2]}"
 
 	is_group "$group" || return 1
-	[[ "$site" =~ "^[-_.A-Za-z0-9]+$" ]] && return 1
+	[[ "$site" =~ ^[-_.A-Za-z0-9]+$ ]] && return 1
 	return 0
 }
 
@@ -352,7 +352,7 @@ function full_site_name()
 {
 	local site="$1"
 
-	if [[ "$site" =~ "^(.+)/(.+)$" ]]; then
+	if [[ "$site" =~ ^(.+)/(.+)$ ]]; then
 		echo "$site"
 	else
 		echo "-/$site"
@@ -397,7 +397,7 @@ function get_path_avail()
 	if [ $# -gt 1 ]; then
 		group="$1"
 		site="$2"
-	elif [[ "$1" =~ "^(.+)/(.+)$" ]]; then
+	elif [[ "$1" =~ ^(.+)/(.+)$ ]]; then
 		group="${BASH_REMATCH[1]}"
 		site="${BASH_REMATCH[2]}"
 	else
@@ -435,7 +435,7 @@ function get_path_enabled()
 	if [ $# -gt 1 ]; then
 		group="$1"
 		site="$2"
-	elif [[ "$1" =~ "^(.+)/(.+)$" ]]; then
+	elif [[ "$1" =~ ^(.+)/(.+)$ ]]; then
 		group="${BASH_REMATCH[1]}"
 		site="${BASH_REMATCH[2]}"
 	else
@@ -536,7 +536,7 @@ function print_sites_status_grid()
 
 		for fullsitename in "${selectsites[@]}"
 		do
-			[[ "$fullsitename" =~ "^$groupname/(.+)$" ]] || continue
+			[[ "$fullsitename" =~ ^$groupname/(.+)$ ]] || continue
 
 			local sitename="${BASH_REMATCH[1]}"
 			local sitestatus="enabled"
@@ -669,7 +669,7 @@ function cmd_list()
 			"disabled")
 				opts="group";;
 			*)
-				opts="group"; [[ "${words[@]}" =~ " (enabled|disabled) " ]] || opts="$opts enabled disabled";;
+				opts="group"; [[ "${words[@]}" =~ (enabled|disabled) ]] || opts="$opts enabled disabled";;
 			esac
 
 			echo "$opts"
@@ -864,7 +864,7 @@ function cmd_enable()
 
 	# First argument is internal enable/disable boolean
 	shift
-	
+
 	if [ $optenablesite -eq 0 ]; then
 		curstatus="enabled"
 		newstatus="disabled"
